@@ -18,6 +18,16 @@ const server = http.createServer(app);	// http 서버 생성
 
 const wss = new WebSocket.Server({ server });	// 웹 소켓 서버 생성, Server( http server ) 같은 서버(포트)에서 websocket, http 실행
 
-wss.on("connection", )
+// function handleConnection(socket) {
+// 	console.log(socket)	// 소켓은 메모리 주소 같은 느낌(연결된 브라우저)
+// }
+
+wss.on("connection", (socket) => {	// 웹소켓으로 접속이 발생하면 실행
+	// console.log(socket);
+	console.log("Connected to Browser!!!");
+	socket.on("close", () => console.log("Disconnected from Browser"));	// client 접속 종료시 발생
+	socket.on("message", (message) => console.log(message.toString()));
+	socket.send("hello");
+});	// 유저가 연결되는 이벤트 처리
 
 server.listen(3000, handleListen);	// 3000번 포트 이벤트 리스너 생성
