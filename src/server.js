@@ -1,6 +1,7 @@
 import express from "express";
 import WebSocket from "ws";
 import http from "http";
+import { Collection } from "mongoose";
 
 
 const app = express();
@@ -27,6 +28,7 @@ const sockets = [];
 wss.on("connection", (socket) => {	// 웹소켓으로 접속이 발생하면 실행 *이 명령어로 접속이 발생하는게 아니다.
 	// console.log(socket);
 	sockets.push(socket);	// socket의 정보를 리스트에 저장
+	socket["nickname"] = "Anon";
 	console.log("Connected to Browser!!!");
 	socket.on("close", () => { 
 			console.log("Disconnected from Browser");
@@ -34,8 +36,16 @@ wss.on("connection", (socket) => {	// 웹소켓으로 접속이 발생하면 실
 		});	// client 접속 종료시 발생
 	// socket.on("message", (message) => console.log(message.toString()));	// client 한테 받은 메세지를 터미널에 출력
 	socket.on("message", (message) => {
-		console.log(message.toString());
-		sockets.forEach((aSocket) => aSocket.send(message.toString()));
+		const msg = JSON.parse(message);	// 받은 JSON을 javascript 객체로 파싱
+		console.log(msg)
+
+		switch(msg.type) {
+			case "new_message":
+				sockets.forEach((aSocket) => aSocket.send(`${socket.nickname}: ${msg.payload}`));	// message에 담겼던 payload키의 value값 전송
+
+			case "nickname":
+				socket["nickname"] = message.payload;
+		}
 	});
 	// socket.send("hello");
 });	// 유저가 연결되는 이벤트 처리
