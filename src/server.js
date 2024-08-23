@@ -44,7 +44,7 @@ wss.on("connection", (socket) => {	// 웹소켓으로 접속이 발생하면 실
 				sockets.forEach((aSocket) => aSocket.send(`${socket.nickname}: ${msg.payload}`));	// message에 담겼던 payload키의 value값 전송
 
 			case "nickname":
-				socket["nickname"] = message.payload;
+				socket["nickname"] = message.payload ;
 		}
 	});
 	// socket.send("hello");
