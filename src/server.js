@@ -20,7 +20,12 @@ const wsServer = new Server(httpServer);	// Socket.io 서버 생성
 
 // connection 감지
 wsServer.on("connection", socket => {
-	console.log(socket);	// socket을 콘솔에 출력
+	/* enter_room이라는 event수신 socket.on(event이름, (인자1, 인자2, ...) => {실행내용} ) */
+	socket.on("enter_room", (msg, backendDone) => {
+		console.log(msg);	// message 출력
+		// backend에서 실행시키지만 실행은 Frontend에서 진행된다!
+		backendDone("backend is done");
+	});
 })
 
 
