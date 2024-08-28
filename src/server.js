@@ -20,6 +20,8 @@ const wsServer = new Server(httpServer);	// Socket.io 서버 생성
 
 // connection 감지
 wsServer.on("connection", socket => {
+
+	socket["nickname"] = "Anon";	// Default nickname Anon
 	socket.onAny((event) => {
 		console.log(`Socket Event:${event}`);
 	});
@@ -31,12 +33,23 @@ wsServer.on("connection", socket => {
 		console.log(socket.rooms);
 		backendDone();
 		// socket.to()라는 함수도 있다.
-		socket.to(roomName.payload).emit("welcome");	// 해당 room의 모든 사람에게 이벤트 보냄
+		socket.to(roomName.payload).emit("welcome", socket["nickname"]);	// 해당 room의 모든 사람에게 이벤트 보냄
 
 		// backend에서 실행시키지만 실행은 Frontend에서 진행된다!
 		// backendDone("backend is done");	// Front 함수에 메세지를 담아서 실행
 	});
-})
+	// 접속 종료 이벤트
+	socket.on("disconnecting", () => {
+		socket.rooms.forEach((room) => socket.to(room).emit("bye"));
+	});
+	// 새로운 메세지가 입력됨
+	socket.on("new_message", (msg, room, done) => {
+		socket.to(room).emit("new_message", msg);
+		done();
+	});
+
+	socket.on("nickname", (nickname) => {socket["nickname"] = nickname});
+});
 
 
 httpServer.listen(3000, handleListen);	// 3000번 포트 이벤트 리스너 생성

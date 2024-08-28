@@ -17,7 +17,10 @@ html(lang="en")
 			div#room
 				h3 
 				ul
-				form
+				form#name
+					input(placeholder="nickname", required, type="text")
+					button Send
+				form#msg
 					input(placeholder="message", required, type="text")
 					button Send
 		//- 아래 스크립트 선언 순서가 바뀌지 않아야 ReferenceError: Can't find variable: io 가 발생하지 않는다
