@@ -96,19 +96,19 @@ camerasSelect.addEventListener("input", handleCameraChange);
 const welcome = document.getElementById("welcome");
 const welcomeForm = welcome.querySelector("form");
 
-async function startMedia() {
+async function initCall() {
 	welcome.hidden = true;
 	call.hidden = false;
-	await getMedia();
-	makeConnection();
+	await getMedia(); // 비디오 태그에 영상 스트림 입력하는 명령
+	makeConnection();	// 
 }
 
-function handleWelcomeSubmit(event) {
+async function handleWelcomeSubmit(event) {
 	event.preventDefault();
 	const input = welcomeForm.querySelector("input");
-
-	// emit: 함수를 함수명() 이런식으로 넣으면  함수명만 넣어야 한다.
-	socket.emit("join_room", input.value, startMedia);
+	await initCall();
+	// emit: 함수를 함수명() 이런식으로 넣으면 안되고 함수명만 넣어야 한다.
+	socket.emit("join_room", input.value);
 	roomName = input.value;
 	input.value = "";
 	// console.log(input.value);
@@ -117,22 +117,69 @@ function handleWelcomeSubmit(event) {
 welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
 // Socket Code
+
+// 
 socket.on("welcome", async () => {
 	// Session 정보가 담겨있음
+	// Offer는 현재 피어의 미디어 설정과 기능(예: 코덱, 전송 옵션 등)에 대한 정보를 포함
 	const offer = await myPeerConnection.createOffer();
-	myPeerConnection.setLocalDescription(offer);
+	myPeerConnection.setLocalDescription(offer);	// 나의 LocalDescription에 Offer정보 저장
 	console.log("sent the offer");
-	socket.emit("offer", offer, roomName);
+	socket.emit("offer", offer, roomName);	// offer 보내는 쪽(처음 접속한 쪽)
 });
 
-socket.on("offer", (offer) => {
-	console.log(offer);
+// 서버에서 offer 들어온 것 받기
+socket.on("offer", async (offer) => {
+	console.log("received the offer");
+	// Connection 중 원격(외부)Description에 offer 저장
+	myPeerConnection.setRemoteDescription(offer);
+	// 들어온 offer에 대한 answer 생성
+	const answer = await myPeerConnection.createAnswer();
+	// console.log(answer);	// 생성된 answer 출력
+	myPeerConnection.setLocalDescription(answer);	// 나의 LocalDescription에 answer정보 저장
+	socket.emit("answer", answer, roomName);
+	console.log("sent the answer");
 });
+
+
+// 서버에서 answer 들어온 것 받기
+socket.on("answer", answer => {
+	console.log("received the answer");
+	// 상대방의 연결 정보에 answer 들어온 것을 저장
+	myPeerConnection.setRemoteDescription(answer);
+});
+
+// 다른 접속자의 정보를 ice 파라미터로 받아온다.
+socket.on("ice", (ice) => {
+	console.log("received candidate");
+	// console.log(ice);
+	myPeerConnection.addIceCandidate(ice);
+});
+
 
 // RTC Code
 function makeConnection() {
-	myPeerConnection = new RTCPeerConnection();
+	myPeerConnection = new RTCPeerConnection();	// RTC P2P 연결 생성 객체
+	// RTCPeerConnection의 icecandidate 이벤트 리스너는 이미 정의되어 있다. 처리 함수만 만들어서 넣어주면 됨.
+	myPeerConnection.addEventListener("icecandidate", handleIce);	// 자신의 icecandidate 정보를 handleIce에 인자로 넘김
+	// safari는 addstream지원 안한다. track은 stream이 아니라 streams로 여러 stream을 Array로 반환
+	myPeerConnection.addEventListener("track", handleAddStream);
 	myStream
-		.getTracks()
+		.getTracks()	// 비디오 입력 스트림에서 현재 입력 소스 가져옴
 		.forEach((track) => myPeerConnection.addTrack(track, myStream));
+}
+
+function handleIce(data) {
+	console.log("sent candidate");
+	socket.emit("ice", data.candidate, roomName);
+}
+
+/* issue safari 작동 안함 */
+function handleAddStream(data) {
+	const peerFace = document.getElementById("peerFace");
+	// console.log("got an stream from my peer");
+	console.log("Peer's stream", data.stream);
+	console.log("this is data", data);
+	peerFace.srcObject = data.streams[0];	// 외부 stream을 웹 프론트 비디오 태그로 등록
+	console.log("My stream", myStream);
 }

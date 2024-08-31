@@ -24,16 +24,23 @@ wsServer.on("connection", socket => {
 		console.log(`Socket Event:${event}`);
 	});
 
-	socket.on("join_room", (roomName, startMedia) => {
+	socket.on("join_room", (roomName) => {
 		console.log("here is join_room(roomName):", roomName);
 		socket.join(roomName);
 		// console.log("here is join_room(startMedia):", startMedia); 
-		startMedia();
 		socket.to(roomName).emit("welcome"); 
 	});
-
+	// offer보내는 쪽의 리스너
 	socket.on("offer", (offer, roomName) => {
 		socket.to(roomName).emit("offer", offer);
+	});
+	// answer받는 리스너
+	socket.on("answer", (answer, roomName) => {
+		socket.to(roomName).emit("answer", answer);
+	});
+
+	socket.on("ice", (ice, roomName) => {
+		socket.to(roomName).emit("ice", ice);
 	});
 });
 

@@ -10,7 +10,7 @@ html(lang="en")
 			h1 Noom
 		main
 			div#welcome
-				form
+				form#roomName
 					input(placeholder="room name", required, type="text")
 					button Enter room
 			div#call
@@ -19,6 +19,7 @@ html(lang="en")
 					button#mute Mute
 					button#camera Turn Camera Object Off
 					select#cameras
+					video#peerFace(autoplay, playsinline, width="400", height="400")
 		//- 아래 스크립트 선언 순서가 바뀌지 않아야 ReferenceError: Can't find variable: io 가 발생하지 않는다
 		script(src="/socket.io/socket.io.js") <!-- socket.io import -->
 		script(src="/public/js/app.js")
