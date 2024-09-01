@@ -170,7 +170,19 @@ socket.on("ice", (ice) => {
 
 // RTC Code
 function makeConnection() {
-	myPeerConnection = new RTCPeerConnection();	// RTC P2P 연결 생성
+	myPeerConnection = new RTCPeerConnection({
+		iceServers: [
+			{
+				urls: [
+					"stun:stun.l.google.com:19302",
+					"stun:sturn1.l.google.com:19302",
+					"stun:sturn2.l.google.com:19302",
+					"stun:sturn3.l.google.com:19302",
+					"stun:sturn4.l.google.com:19302"
+				]
+			}
+		]
+	});	// RTC P2P 연결 생성
 	// RTCPeerConnection의 icecandidate 이벤트 리스너는 이미 정의되어 있다. 처리 함수만 만들어서 넣어주면 됨.
 	myPeerConnection.addEventListener("icecandidate", handleIce);	// 자신의 icecandidate 정보를 handleIce에 인자로 넘김
 	// safari는 addstream지원 안한다. track은 stream이 아니라 streams로 여러 stream을 Array로 반환

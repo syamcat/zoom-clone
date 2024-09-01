@@ -5,7 +5,8 @@
   "description": "zoom clone using WebRTC and Websockets",
   "scripts": {
     "dev": "nodemon",
-    "start": "nodemon"
+    "start": "nodemon",
+    "localtunnel": "lt --port 3000"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.8",
@@ -16,6 +17,7 @@
   },
   "dependencies": {
     "express": "^4.19.2",
+    "localtunnel": "^2.0.2",
     "pug": "^3.0.3",
     "socket.io": "^4.7.5",
     "ws": "^8.18.0"
