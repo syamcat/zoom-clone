@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon",
     "start": "nodemon",
-    "localtunnel": "lt --port 3000"
+    "localtunnel": "lt --port 3000",
+    "start:windows": "set HTTPS=true&&set SSL_CRT_FILE=cert/localhost.pem&&set SSL_KEY_FILE=cert/localhost-key.pem&&npm run start"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.8",
